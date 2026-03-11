@@ -1,0 +1,60 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{3E0B7FC8-5134-4080-B594-24A1DB999B0C}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="WindowsMessaging.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Demo\RxDemo.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Demo\TxDemo.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="WindowsMessaging">
+        <MSBuild Projects="WindowsMessaging.dproj"/>
+    </Target>
+    <Target Name="WindowsMessaging:Clean">
+        <MSBuild Projects="WindowsMessaging.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="WindowsMessaging:Make">
+        <MSBuild Projects="WindowsMessaging.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="RxDemo">
+        <MSBuild Projects="Demo\RxDemo.dproj"/>
+    </Target>
+    <Target Name="RxDemo:Clean">
+        <MSBuild Projects="Demo\RxDemo.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="RxDemo:Make">
+        <MSBuild Projects="Demo\RxDemo.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="TxDemo">
+        <MSBuild Projects="Demo\TxDemo.dproj"/>
+    </Target>
+    <Target Name="TxDemo:Clean">
+        <MSBuild Projects="Demo\TxDemo.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TxDemo:Make">
+        <MSBuild Projects="Demo\TxDemo.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="WindowsMessaging;RxDemo;TxDemo"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="WindowsMessaging:Clean;RxDemo:Clean;TxDemo:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="WindowsMessaging:Make;RxDemo:Make;TxDemo:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
