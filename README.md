@@ -66,6 +66,6 @@ If you have questions, find a bug, or want to suggest a feature for the **Window
 * **Website:** [latitude53north.co.uk](https://latitude53north.co.uk)
 
 > [!TIP]
-> If you encounter an issue with window handle detection, please include your Windows version and Delphi edition in the [Issue Tracker](https://github.com/antonydanby/ProjectName/issues).
+> If you encounter an issue with window handle detection, please include your Windows version and Delphi edition in the [Issue Tracker](https://github.com/antonydanby/WindowsMessaging/issues).
 >
 > 
