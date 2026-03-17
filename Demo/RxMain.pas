@@ -3,11 +3,7 @@ unit RxMain;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages,
-  System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,Vcl.ExtCtrls,
-
-  WMsgReceiver;
+  Forms, Classes, Controls, StdCtrls, ExtCtrls, WMsgReceiver;
 
 type
   TRXForm = class(TForm)
@@ -17,16 +13,18 @@ type
     btnStart: TButton;
     btnStop: TButton;
     WMsgReceiver: TWMsgReceiver;
+    SubPanel: TPanel;
+    chkUIPI: TCheckBox;
 
     procedure FormDestroy(Sender: TObject);
     procedure btnStartClick(Sender: TObject);
     procedure btnStopClick(Sender: TObject);
     procedure WMsgReceiverMessageReceived(aID: Cardinal; aMsg: string);
+    procedure ReceiverEditChange(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure chkUIPIClick(Sender: TObject);
   private
-    { Private declarations }
-    procedure StopTheReceiver;
-  public
-    { Public declarations }
+    procedure UpdateUI;
   end;
 
 var
@@ -37,40 +35,67 @@ implementation
 {$R *.dfm}
 
 uses
-  WMsgCommon;
+  SysUtils, Windows, WMsgCommon;
+
+function IsRunAsAdministrator: Boolean;
+const
+  ELEVATION_FULL = 2;
+var
+  hToken: THandle;
+  dwElevation, dwSize: Cardinal;
+begin
+  Result := False;
+  if OpenProcessToken(GetCurrentProcess, TOKEN_QUERY, hToken) then try
+    dwElevation := 0;
+    Result := (GetTokenInformation(hToken, TokenElevationType, @dwElevation, SizeOf(Cardinal), dwSize)) and (dwElevation = ELEVATION_FULL);
+    dwElevation := 0;
+    Result := Result or (((GetTokenInformation(hToken, TokenElevation, @dwElevation, SizeOf(Cardinal), dwSize))) and (dwElevation > 0))
+  finally
+    CloseHandle(hToken)
+  end
+end;
 
 procedure TRXForm.btnStartClick(Sender: TObject);
 begin
-  StopTheReceiver;
+  if Length(Trim(ReceiverEdit.Text)) = 0 then
+    ReceiverEdit.Text := WMSG_DEFAULT_WINDOW;
 
-  WMsgReceiver.OnMessageReceived := WMsgReceiverMessageReceived;
-  if not (Trim(ReceiverEdit.Text) = '')
-    then
-    begin
-      WMsgReceiver.WindowName := ReceiverEdit.Text
-    end
-    else
-    begin
-      WMsgReceiver.WindowName := WMSG_DEFAULT_WINDOW;
-      ReceiverEdit.Text := WMsgReceiver.WindowName;
-    end;
+  WMsgReceiver.WindowName := ReceiverEdit.Text;
   WMsgReceiver.Start;
+  UpdateUI
 end;
 
 procedure TRXForm.btnStopClick(Sender: TObject);
 begin
-  StopTheReceiver;
+  WMsgReceiver.Stop;
+  UpdateUI
+end;
+
+procedure TRXForm.chkUIPIClick(Sender: TObject);
+begin
+  WMsgReceiver.LowProcessMessages := chkUIPI.Checked
+end;
+
+procedure TRXForm.FormCreate(Sender: TObject);
+begin
+  chkUIPI.Enabled := IsRunAsAdministrator
 end;
 
 procedure TRXForm.FormDestroy(Sender: TObject);
 begin
-  StopTheReceiver;
+  WMsgReceiver.Stop
 end;
 
-procedure TRXForm.StopTheReceiver;
+procedure TRXForm.ReceiverEditChange(Sender: TObject);
 begin
-  WMsgReceiver.OnMessageReceived := nil;
-  WMsgReceiver.Stop;
+  UpdateUI
+end;
+
+procedure TRXForm.UpdateUI;
+begin
+  ReceiverEdit.Enabled := not WMsgReceiver.Active;
+  btnStart.Enabled := not WMsgReceiver.Active and (Length(Trim(ReceiverEdit.Text)) > 0);
+  btnStop.Enabled := WMsgReceiver.Active
 end;
 
 procedure TRXForm.WMsgReceiverMessageReceived(aID: Cardinal; aMsg: string);

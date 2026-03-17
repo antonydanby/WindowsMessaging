@@ -51,6 +51,24 @@ Window Names: WM_COPYDATA relies on finding the target window handle by name. En
 
 Data Limits: While WM_COPYDATA is efficient, it is intended for small-to-medium data packets. For multi-gigabyte transfers, consider memory-mapped files.
 
+## ⚠️ Limitations
+
+### User Interface Privilege Isolation
+
+Under Windows Vista and later, UIPI prevents by default certain messages, including `WM_COPYDATA` being delivered from lower execution level process to higher execution level processes. APIs have been introduced for a high execution level process to allow these to be delivered to himself. Under Vista the isolation can be turned off for a certain message at process level, this means all windows created by the same process receive the message after being enabled, starting from Windows 7 isolation is at window level, meaning each window can set its own accepted messages.
+
+The code has been written to take advantage from the later and, if not available, from the previous, while maintaining retro compatibility with pre-Vista operating systems.
+
+A new `LowProcessMessages` property has been added to the `TWMsgReceiver` component, setting it to true will allow lower execution level processes' messages to be delivered to the elevated receiver.
+
+Settings this into low execution level processes has no effect.
+
+To test this, execute `TxDemo.exe` normally while running `RxDemo.exe` as Administrator.
+
+### Windows Stations isolation
+
+This component it not designed to be used in case you need IPC for processes running under different windows stations, for example if you need a desktop or console application which is running under the interactive user windows station (`WinSta0`) to communicate with a service (which is running in Session 0).
+
 # 📄 License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
@@ -67,5 +85,3 @@ If you have questions, find a bug, or want to suggest a feature for the **Window
 
 > [!TIP]
 > If you encounter an issue with window handle detection, please include your Windows version and Delphi edition in the [Issue Tracker](https://github.com/antonydanby/WindowsMessaging/issues).
->
-> 
